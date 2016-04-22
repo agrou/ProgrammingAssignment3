@@ -1,23 +1,22 @@
 library(dplyr)
 library(tidyr)
 library(magrittr)
-#Testing for Ranking hospitals in all states
+
+## Ranking hospitals in all states
 
 rankall <- function(outcome, num = "best") {
-        ##Read outcome data
+        ## Read outcome data
         hosp_dat <- read.csv("outcome-of-care-measures.csv", 
                               na.strings = "Not Available", 
                               stringsAsFactors = FALSE) %>%
-        #Select the data that is needed
+        # Select only the data that is needed
         select(State, starts_with("Hospital")) %>% 
         select(-contains("Readmission")) %>%
         gather(Outcome, Rate, contains("Rate")) %>%
         mutate(Outcome2 = tolower(gsub("[.]", " ", 
                 gsub("Hospital.30.Day.Death..Mortality..Rates.from.", "", 
                                                     Outcome)))) %>%
-                select(-Outcome) %>%
-                
-        ## Remove missing values
+        select(-Outcome) %>%
         filter(!is.na(Rate))
         
         ## Check that outcome is valid
@@ -25,15 +24,15 @@ rankall <- function(outcome, num = "best") {
         if (!(outcome %in% unique(hosp_dat$Outcome2))) stop("Invalid outcome")
                 
         ## For each state, find the hospital of the given rank
-        
-        ## Subset the data by outcome
-        subdat <- hosp_dat %>%
+        ## Subset the data by state
+        subdat <<- hosp_dat %>%
                 filter(Outcome2==outcome) %>%
+                arrange(State, Rate, Hospital.Name) %>%
                 group_by(State) %>%
-                mutate(Rank = row_number(Rate)) %>%
-                mutate(maxRank = max(Rate)) 
+                mutate(Rank = row_number()) %>%
+                mutate(maxRank = max(Rank)) 
         
-        ##Find the hospital of the given rank 
+        ## Find the hospital of the given rank 
         if (is.character(num)){
                 if (num == "best"){
                         rvalue = min(subdat$Rank)
@@ -44,28 +43,27 @@ rankall <- function(outcome, num = "best") {
                 }
         } else rvalue = num
         
-        ##Return a data frame with the hospital names and the 
-        ##(abbreviated) state name
-        if (rvalue > max(subdat$Rank)){
-                hosp_rank = NA
-        } else if (rvalue >= 0) {
-                hosp_rank = subdat %>% #ungroup() %>% 
+        ## Return a data frame with the hospital names and the 
+        ## (abbreviated) state name
+        if (rvalue >= 0) {
+                hosp_rank <- subdat %>%  
                         filter(Rank == rvalue) %>%
                         select(Hospital.Name, State) %>%
                         arrange(State)
         } else { 
-                hosp_rank = subdat %>% 
+                hosp_rank <<- subdat %>% 
                 filter(maxRank == Rank) %>% 
                 select(Hospital.Name, State) %>%
-                        arrange(State)
+                arrange(State)
         }   
 
-return(hosp_rank)        
+        return(hosp_rank)        
 }
 
+# Testing the function
 head(rankall("heart attack", 20), 10)
 tail(rankall("heart attack", "worst"), 10)
 tail(rankall("heart failure", "worst"), 10)
+tail(rankall("heart failure"), 10)
 tail(rankall("pneumonia", "worst"), 3)
-
 rankall("heart failure", "worst")
