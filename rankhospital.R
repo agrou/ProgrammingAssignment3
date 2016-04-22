@@ -2,10 +2,10 @@ library(dplyr)
 library(tidyr)
 library(magrittr)
 
-##Ranking hospitals by outcome in a state
+## Ranking hospitals by outcome in a state
 
 rankhospital <- function(state, outcome, num="best"){
-        ##Read outcome data
+        ## Read outcome data
         hosp_dat <- read.csv("outcome-of-care-measures.csv", 
                              na.strings = "Not Available", 
                              stringsAsFactors = FALSE) %>%
@@ -20,17 +20,18 @@ rankhospital <- function(state, outcome, num="best"){
                 #Remove missing values
                 filter(!is.na(Rate)) 
         
-        ##Check that state and outcome are valid
+        ## Check that state and outcome are valid
         if (!(state %in% unique(hosp_dat$State))) stop("Invalid state")
         
         if (!(outcome %in% unique(hosp_dat$Outcome2))) stop("Invalid outcome")
         
-        ##subset the data by state and outcome
+        ## Subset the data by state and outcome
         subdat <- hosp_dat %>%
                   filter(State==state & Outcome2==outcome) %>% 
-                         mutate(Rank = rank(Rate, ties.method = "first")) 
+                  arrange(State, Rate, Hospital.Name) %>%
+                  mutate(Rank = rank(Rate, ties.method = "first"))
         
-        ##Find the hospital of the given rank 
+        ## Find the hospital of the given rank 
         if (is.character(num)){
                 if (num == "best"){
                         rvalue = min(subdat$Rank)
@@ -41,8 +42,8 @@ rankhospital <- function(state, outcome, num="best"){
                 }
         } else rvalue = num
         
-        ##Return hospital name in that state with the given rank
-        ##30-day death rate
+        ## Return hospital name in that state with the given rank
+        ## 30-day death rate
         if (rvalue > max(subdat$Rank)){
                 return(NA)
         } else { 
@@ -50,6 +51,8 @@ rankhospital <- function(state, outcome, num="best"){
                 print(hosp_rank)
         }
 }
+
+## Testing the function
 
 rankhospital("TX", "heart failure", 4)
 rankhospital("MD", "heart attack", "worst")
