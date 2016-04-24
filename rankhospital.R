@@ -64,3 +64,7 @@ rankhospital("CA", "heart failure", 25)
 rankhospital("CA", "heart attack", 9)
 rankhospital("CA", "heart failure", 90000)
 
+rankhospital("NC", "heart attack", "worst")
+rankhospital("WA", "heart attack", 7)
+rankhospital("TX", "pneumonia", 10)
+rankhospital("NY", "heart attack", 7)

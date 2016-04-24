@@ -37,15 +37,19 @@ best <- function(state, outcome){
                 filter(State == state & Outcome2 == outcome) %>% 
                 summarise(fmin = first(Hospital.Name)) 
         
-        print(hosp_min[[3]]) 
+        print(hosp_r[[3]]) 
 }
 
 # Testing the function
 best("TX", "heart attack")
 best("TX", "heart failure")
 best("MD", "pneumonia")
+best("MD", "heart attack")
 best("BB", "hert attack")
 best("NY", "hert attack")
 
+best("SC", "heart attack")
+best("NY", "pneumonia")
+best("AK", "pneumonia")
 
 

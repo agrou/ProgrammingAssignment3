@@ -67,3 +67,12 @@ tail(rankall("heart failure", "worst"), 10)
 tail(rankall("heart failure"), 10)
 tail(rankall("pneumonia", "worst"), 3)
 rankall("heart failure", "worst")
+
+r <- rankall("heart attack", 4)
+as.character(subset(r, State == "HI")$Hospital.Name)
+
+r <- rankall("pneumonia", "worst")
+as.character(subset(r, State == "NJ")$Hospital.Name)
+
+r <- rankall("heart failure", 10)
+as.character(subset(r, State == "NV")$Hospital.Name)
